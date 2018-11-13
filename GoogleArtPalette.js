@@ -15,7 +15,7 @@ export default class GoogleArtPalette extends React.Component {
     
     const hex = colors.map( colorObj => {
       const { color } = colorObj;
-      console.log('color:', color);
+      // console.log('color:', color);
       const { red, green, blue } = color;
       return rgbHex(red, green, blue);
     })

@@ -7,7 +7,7 @@ import rgbHex from 'rgb-hex';
 
 import React, { Fragment } from 'react';
 import { Text, View, TouchableOpacity, ScrollView, Button, WebView, ActivityIndicator } from 'react-native';
-import { Camera, Permissions, FileSystem } from 'expo';
+import { Camera, Permissions, FileSystem, ImagePicker } from 'expo';
 import styles from './Lens.styles';
 
 import Colors from './Colors';
@@ -20,6 +20,7 @@ export default class CameraExample extends React.Component {
   constructor() {
     super();
     this.state = {
+      image: null,
       loading: false,
       webView: false,
       colors: [],
@@ -51,6 +52,23 @@ export default class CameraExample extends React.Component {
     this.returnToCamera = this.returnToCamera.bind(this);
     this.toggleWebView = this.toggleWebView.bind(this);
   }
+
+  pickImage = async () => {
+    let image = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: false,
+      aspect: [4, 3],
+      base64: true
+    });
+
+    console.log(image);
+
+    const { base64 } = image;
+    await this.requestAnalysis(base64);
+
+    if (!image.cancelled) {
+      this.setState({ image: image.uri });
+    }
+  };
 
   idealTextColor(bgColor) {
 
@@ -207,7 +225,6 @@ export default class CameraExample extends React.Component {
                   const rgb = getRGB(color);
                   const hex = rgbHex(rgb);
                   const textColor = this.idealTextColor(hex);
-                  console.log('textColor:', textColor);
 
                   return (
                     <View key={index} style={{ elevation: 8, borderRadius: 15, marginTop: 15, marginRight: 30, marginBottom: 15, marginLeft: 30, height: 200, backgroundColor: getRGB(color) }}>
@@ -256,8 +273,12 @@ export default class CameraExample extends React.Component {
 
               <View style={{ elevation: 9, padding: 30, backgroundColor: '#404040' }}>  
                 <Button
-                  title='CREATE PALETTE'
+                  title='Take Photo'
                   onPress={takePicture}
+                />
+                <Button
+                  title='Pick Image'
+                  onPress={this.pickImage}
                 />
               </View>
             </View>
