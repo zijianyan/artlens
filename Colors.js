@@ -26,9 +26,9 @@ export default class Color extends React.Component {
           {
             colors.map( color => {
               return (
-                <div style ={{ height: '30px', backgroundColor: 'rgba(200, 200, 0)' }}>
+                <View style ={{ height: '30px', backgroundColor: 'rgba(200, 200, 0)', padding: '5px' }}>
                 <Text>Color Here</Text>
-                </div>
+                </View>
                 
               )
             })

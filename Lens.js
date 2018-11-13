@@ -185,7 +185,8 @@ export default class CameraExample extends React.Component {
     if(this.state.loading) {
       return (
         <View style={{ flex: 1,  justifyContent: 'center', alignItems: 'center', backgroundColor: '#181818'}}>
-          <ActivityIndicator size={'large'} style={{}}/>
+          <ActivityIndicator size={100} style={{}}/>
+          <Text style={{ color: '#ffffff'}} >Creating Palette...</Text>
         </View>
       )
     }
@@ -230,9 +231,9 @@ export default class CameraExample extends React.Component {
                   const textColor = this.idealTextColor(hex);
 
                   return (
-                    <View key={index} style={{ elevation: 8, borderRadius: 15, marginTop: 15, marginRight: 30, marginBottom: 15, marginLeft: 30, height: 200, backgroundColor: getRGB(color) }}>
+                    <View key={index} style={{ elevation: 8, borderRadius: 15, marginTop: 15, marginRight: 30, marginBottom: 15, marginLeft: 30, height: 200, backgroundColor: getRGB(color), padding: 15 }}>
                       <Text style={{ color: textColor }}>{rgb}</Text>
-                      <Text style={{ color: textColor }}>{hex}</Text>
+                      <Text style={{ color: textColor }}>#{hex}</Text>
                     </View>
                   )
                 })
