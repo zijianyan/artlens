@@ -2,7 +2,7 @@
 import React, { Fragment } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
-
+import rgbHex from 'rgb-hex';
 
 export default class Color extends React.Component {
   state = {

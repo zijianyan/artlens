@@ -3,6 +3,8 @@ import axios from 'axios';
 import googleAPIKey from './cloudVision';
 
 
+import rgbHex from 'rgb-hex';
+
 import React, { Fragment } from 'react';
 import { Text, View, TouchableOpacity, ScrollView, Button, WebView } from 'react-native';
 import { Camera, Permissions, FileSystem } from 'expo';
@@ -171,7 +173,7 @@ export default class CameraExample extends React.Component {
         return (
           <Fragment>
             <GoogleArtPalette colors={colors}/>
-            <View style={{ padding: 30, backgroundColor: 'black' }}>  
+            <View style={{ padding: 30, backgroundColor: '#181818' }}>  
               <Button
                 title='Return To Camera'
                 onPress={toggleWebView}
@@ -185,20 +187,23 @@ export default class CameraExample extends React.Component {
         return ( 
           <Fragment> 
             
-            <ScrollView horizontal>
+            <ScrollView style={{ backgroundColor: '#404040', paddingTop: 40 }}>
               
-              <Text>Colors.length: {colors.length}</Text>
               {
                 colors.map( (color, index) => {
                   const rgb = getRGB(color);
-                  // console.log('rgb:', rgb);
+                  const hex = rgbHex(rgb);
+        
                   return (
-                    <View key={index} style={{ width: 200, backgroundColor: getRGB(color) }} />
+                    <View key={index} style={{ elevation: 8, borderRadius: 15, marginTop: 15, marginRight: 30, marginBottom: 15, marginLeft: 30, height: 200, backgroundColor: getRGB(color) }}>
+                      <Text>{rgb}</Text>
+                      <Text>{hex}</Text>
+                    </View>
                   )
                 })
               }
             </ScrollView>
-              <View style={{ padding: 30, display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', backgroundColor: 'black'}}>  
+              <View style={{ elevation: 9, padding: 30, display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', backgroundColor: '#404040'}}>  
                   <Button
                     title='Return to Camera'
                     onPress={returnToCamera}
@@ -244,7 +249,7 @@ export default class CameraExample extends React.Component {
 
               </Camera>
 
-                <View style={{ padding: 30, backgroundColor: 'black' }}>  
+                <View style={{ elevation: 9, padding: 30, backgroundColor: '#404040' }}>  
                   <Button
                     title='CREATE PALETTE'
                     onPress={takePicture}
@@ -261,6 +266,7 @@ export default class CameraExample extends React.Component {
 }
 
 
+// Animatable.Text animation="zoomInUp"
 
                   // <TouchableOpacity
                   //   style={{
