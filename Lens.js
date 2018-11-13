@@ -51,6 +51,27 @@ export default class CameraExample extends React.Component {
     this.toggleWebView = this.toggleWebView.bind(this);
   }
 
+  idealTextColor(bgColor) {
+
+    var nThreshold = 150;
+    var components = this.getRGBComponents(bgColor);
+    var bgDelta = (components.R * 0.299) + (components.G * 0.587) + (components.B * 0.114);
+
+    return ((255 - bgDelta) < nThreshold) ? "#000000" : "#ffffff";   
+  }
+
+  getRGBComponents(color) {       
+
+      var r = color.substring(1, 3);
+      var g = color.substring(3, 5);
+      var b = color.substring(5, 7);
+
+      return {
+        R: parseInt(r, 16),
+        G: parseInt(g, 16),
+        B: parseInt(b, 16)
+      };
+  }
 
   getRGB(colorObj) {
     const { color } = colorObj;
@@ -68,6 +89,7 @@ export default class CameraExample extends React.Component {
   }
 
   async requestAnalysis(base64) {
+   try { 
     const body = {
         requests:[
           {
@@ -109,7 +131,10 @@ export default class CameraExample extends React.Component {
     this.setState({ colors: cloudVisionColors });
     // console.log('this.state.colors:', this.state.colors);
 
-
+   }
+   catch(ex) {
+     console.log(ex);
+   }
   }
 
   async componentDidMount() {
@@ -184,6 +209,9 @@ export default class CameraExample extends React.Component {
       } 
 
       if (colors.length) {
+
+        
+
         return ( 
           <Fragment> 
             
@@ -193,11 +221,13 @@ export default class CameraExample extends React.Component {
                 colors.map( (color, index) => {
                   const rgb = getRGB(color);
                   const hex = rgbHex(rgb);
-        
+                  const textColor = this.idealTextColor(hex);
+                  console.log('textColor:', textColor);
+
                   return (
                     <View key={index} style={{ elevation: 8, borderRadius: 15, marginTop: 15, marginRight: 30, marginBottom: 15, marginLeft: 30, height: 200, backgroundColor: getRGB(color) }}>
-                      <Text>{rgb}</Text>
-                      <Text>{hex}</Text>
+                      <Text style={{ color: textColor }}>{rgb}</Text>
+                      <Text style={{ color: textColor }}>{hex}</Text>
                     </View>
                   )
                 })
@@ -264,6 +294,8 @@ export default class CameraExample extends React.Component {
     }
   }
 }
+
+
 
 
 // Animatable.Text animation="zoomInUp"
