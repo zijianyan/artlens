@@ -16,6 +16,7 @@ import GoogleArtPalette from './GoogleArtPalette';
 
 
 
+
 export default class CameraExample extends React.Component {
   constructor() {
     super();
