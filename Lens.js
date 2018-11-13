@@ -1,0 +1,385 @@
+import axios from 'axios';
+
+import googleAPIKey from './cloudVision';
+
+
+import React, { Fragment } from 'react';
+import { Text, View, TouchableOpacity, ScrollView, Button } from 'react-native';
+import { Camera, Permissions, FileSystem } from 'expo';
+import styles from './Lens.styles';
+
+import Colors from './Colors';
+
+export default class CameraExample extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      colors: [],
+      description: '',
+      hasCameraPermission: null,
+      type: Camera.Constants.Type.back,
+
+      flash: 'off',
+      zoom: 0,
+      autoFocus: 'on',
+      type: 'back',
+      whiteBalance: 'auto',
+      ratio: '16:9',
+      ratios: [],
+      barcodeScanning: false,
+      faceDetecting: false,
+      faces: [],
+      newPhotos: false,
+      permissionsGranted: false,
+      pictureSize: '320x180', //1920x1080 
+      pictureSizes: [],
+      pictureSizeId: 0,
+      showGallery: false,
+      showMoreOptions: false,
+
+    }
+    this.takePicture = this.takePicture.bind(this);
+    this.requestAnalysis = this.requestAnalysis.bind(this);
+    this.returnToCamera = this.returnToCamera.bind(this);
+  }
+
+
+  getRGB(colorObj) {
+    const { color } = colorObj;
+    const { red, green, blue } = color;
+    return `rgb(${red}, ${green}, ${blue})`
+    // console.log(`getRGB: rgb(${red}, ${green}, ${blue})`)
+
+  }
+
+  async requestAnalysis(base64) {
+    const body = {
+        requests:[
+          {
+            image:{
+              content: base64,
+            },
+            features:[
+              {
+                "type": "IMAGE_PROPERTIES"
+              },
+              // { "type": "LABEL_DETECTION", "maxResults": 5 },
+              // { "type": "LOGO_DETECTION", "maxResults": 3 },
+              // { "type": "WEB_DETECTION", "maxResults": 1 }
+            ]
+          },
+        ],
+      };
+
+    console.log('fetching...');
+    const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${googleAPIKey}` , {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    console.log('fetched!');
+
+    const cloudVisionData = await response.json();
+    const cloudVisionColors = cloudVisionData.responses[0].imagePropertiesAnnotation.dominantColors.colors;
+    // const cloudLogoDescription = cloudVisionData.responses[0].logoAnnotations[0].description;
+    // const cloudWebLabel = cloudVisionData.responses[0].webDetection.bestGuessLabels[0].label;
+
+    // console.log('logoDescription:', cloudLogoDescription);
+    // console.log('cloudWebLabel:', cloudWebLabel);
+
+    // console.log('cloudVisonColors:', cloudVisionColors);
+    this.setState({ colors: cloudVisionColors });
+    console.log('this.state.colors:', this.state.colors);
+
+
+  }
+
+  async componentDidMount() {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    this.setState({ hasCameraPermission: status === 'granted' });
+    // FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
+    //   console.log(e, 'Directory existssss');
+    // });
+  }
+
+  async takePicture() {
+    if (this.camera) {
+      console.log('takePicture, taking picture');
+      const picture = await this.camera.takePictureAsync({ base64: true })
+      const { base64 } = picture;
+      await this.requestAnalysis(base64);
+    }
+  };
+
+  // async onPictureSaved (photo) {
+  //   await FileSystem.moveAsync({
+  //     from: photo.uri,
+  //     to: `${FileSystem.documentDirectory}photos/${Date.now()}.jpg`,
+  //   });
+  //   this.setState({ newPhotos: true });
+  // }
+
+  logPress() {
+    console.log('button pressed');
+  }
+
+  returnToCamera() {
+    this.setState({ colors: [] })
+  }
+
+  render() {
+    const { colors } = this.state;
+    const { takePicture, logPress, getRGB, returnToCamera } = this;
+
+    const { hasCameraPermission } = this.state;
+    if (hasCameraPermission === null) {
+      return <View />;
+    } else if (hasCameraPermission === false) {
+      return <Text>No access to camera</Text>;
+    } else {
+
+
+      if (this.state.description) {
+        return (
+          <View>
+            <Text>
+              {this.state.description}
+            </Text>
+          </View>
+        )
+      } 
+
+      if (colors.length) {
+        return ( 
+          <Fragment> 
+            
+            <ScrollView horizontal>
+              
+              <Text>Colors.length: {colors.length}</Text>
+              {
+                colors.map( (color, index) => {
+                  const rgb = getRGB(color);
+                  console.log('rgb:', rgb);
+                  return (
+                    <View key={index} style={{ width: 200, backgroundColor: getRGB(color) }} />
+                  )
+                })
+              }
+            </ScrollView>
+            <View style={{ padding: 30 }}>  
+              <Button
+                title='RETURN TO CAMERA'
+                // style={{ position: 'fixed'}}
+                onPress={returnToCamera}
+              />
+            </View>
+          </Fragment>
+        )
+      } else {
+        return (
+          <Fragment>
+            <View style={{ flex: 1 }}>
+              <Camera
+              ref={ref => {
+                this.camera = ref;
+              }}
+              style={styles.camera}
+              onCameraReady={this.collectPictureSizes}
+              type={this.state.type}
+              flashMode={this.state.flash}
+              autoFocus={this.state.autoFocus}
+              zoom={this.state.zoom}
+              whiteBalance={this.state.whiteBalance}
+              ratio={this.state.ratio}
+              pictureSize={this.state.pictureSize}
+              onMountError={this.handleMountError}
+              >
+           
+
+
+
+
+                 
+
+
+
+
+              </Camera>
+               <View style={{ padding: 30 }}>  
+                    <Button
+                      title='CREATE PALETTE'
+                      onPress={takePicture}
+                    />
+                  </View>
+            </View>
+          </Fragment>
+        );
+      }
+
+      
+    }
+  }
+}
+
+
+
+                  // <TouchableOpacity
+                  //   style={{
+                  //     flex: 0.3,
+                  //     alignSelf: 'flex-end',
+                  //     alignItems: 'center',
+                  //   }}
+                  //   onPress={takePicture}>
+                  //   <Text
+                  //     style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
+                  //     {' '}Button take picture{' '}
+                  //   </Text>
+                  // </TouchableOpacity>
+
+
+              // <TouchableOpacity
+              //   style={{
+              //     flex: 0.1,
+              //     alignSelf: 'flex-end',
+              //     alignItems: 'center',
+              //   }}
+              //   onPress={() => {
+              //     this.setState({
+              //       type: this.state.type === Camera.Constants.Type.back
+              //         ? Camera.Constants.Type.front
+              //         : Camera.Constants.Type.back,
+              //     });
+              //   }}>
+              //   <Text
+              //     style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
+              //     {' '}Flip{' '}
+              //   </Text>
+              // </TouchableOpacity>
+
+              
+
+            //               ref={ref => {
+            //   this.camera = ref;
+            // }}
+
+
+
+
+              //             <TouchableOpacity
+              //   style={{
+              //     flex: 0.1,
+              //     alignSelf: 'flex-end',
+              //     alignItems: 'center',
+              //   }}
+              //   onPress={takePicture}>
+              //   <Text
+              //     style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
+              //     {' '}Take Picture{' '}
+              //   </Text>
+              // </TouchableOpacity>
+
+
+
+/****met info */
+
+// axios.get('https://metmuseum.org/api/collection/collectionlisting?q=john%20singer%20sargent&perPage=20&searchField=All&sortBy=relevance&offset=0&pageSize=0')
+//   .then( res => res.data )
+//   .then( data => data.results )
+//   .then( results => {
+//     const painting = results[0];
+//   })
+
+// const sampleResult =
+// {
+//   title: 'Madame X (Madame Pierre Gautreau)',
+//   description: 'John Singer Sargent (American, Florence 1856–1925 London)',
+//   artist: '  ',
+//   culture: 'American',
+//   teaserText: '<p>John Singer Sargent (American, Florence 1856–1925 London) </p><p>Date: 1883–84<br/>Accession Number: 16.53</p>',
+//   url: '/art/collection/search/12127?searchField=All&amp;sortBy=relevance&amp;ft=john+singer+sargent&amp;offset=0&amp;rpp=20&amp;pos=1',
+//   image: 'https://images.metmuseum.org/CRDImages/ad/mobile-large/DT91.jpg',
+//   regularImage: 'ad/web-additional/DT91.jpg',
+//   largeImage: 'ad/web-large/DT91.jpg',
+//   date: '1883–84',
+//   medium: 'Oil on canvas',
+//   accessionNumber: '16.53',
+//   galleryInformation: 'On view at The Met Fifth Avenue in <a href=\'http://maps.metmuseum.org/galleries/fifth-ave/2/771\' target=\'_blank\'>Gallery 771</a>'
+// }
+
+
+
+
+
+/**** example cloudVision response below */
+
+
+// cloudVisionData: Object {
+// [14:13:29]   "responses": Array [
+// [14:13:29]     Object {
+// [14:13:29]       "logoAnnotations": Array [
+// [14:13:29]         Object {
+// [14:13:29]           "boundingPoly": Object {
+// [14:13:29]             "vertices": Array [
+// [14:13:29]               Object {
+// [14:13:29]                 "x": 73,
+// [14:13:29]                 "y": 71,
+// [14:13:29]               },
+// [14:13:29]               Object {
+// [14:13:29]                 "x": 158,
+// [14:13:29]                 "y": 71,
+// [14:13:29]               },
+// [14:13:29]               Object {
+// [14:13:29]                 "x": 158,
+// [14:13:29]                 "y": 116,
+// [14:13:29]               },
+// [14:13:29]               Object {
+// [14:13:29]                 "x": 73,
+// [14:13:29]                 "y": 116,
+// [14:13:29]               },
+// [14:13:29]             ],
+// [14:13:29]           },
+// [14:13:29]           "description": "Vase with Irises",
+// [14:13:29]           "score": 0.37161863,
+// [14:13:29]         },
+// [14:13:29]       ],
+// [14:13:29]       "webDetection": Object {
+// [14:13:29]         "bestGuessLabels": Array [
+// [14:13:29]           Object {
+// [14:13:29]             "label": "metropolitan museum of art",
+// [14:13:29]           },
+// [14:13:29]         ],
+// [14:13:29]         "pagesWithMatchingImages": Array [
+// [14:13:29]           Object {
+// [14:13:29]             "pageTitle": "Beautiful Vincent van Gogh Metal Prints artwork for sale ... - <b>Art</b>.com",
+// [14:13:29]             "partialMatchingImages": Array [
+// [14:13:29]               Object {
+// [14:13:29]                 "url": "https://imgc.artprintimages.com/img/print/vincent-van-gogh-irises_u-l-pnxjyf0.jpg?src=gp&w=300&h=300",
+// [14:13:29]               },
+// [14:13:29]             ],
+// [14:13:29]             "url": "https://www.art.com/gallery/id--a84-d779949/vincent-van-gogh-metal-prints.htm",
+// [14:13:29]           },
+// [14:13:29]         ],
+// [14:13:29]         "partialMatchingImages": Array [
+// [14:13:29]           Object {
+// [14:13:29]             "url": "https://item-shopping.c.yimg.jp/i/j/primavera-cards_ns45rcf0bk",
+// [14:13:29]           },
+// [14:13:29]         ],
+// [14:13:29]         "visuallySimilarImages": Array [
+// [14:13:29]           Object {
+// [14:13:29]             "url": "http://www.celebrityartbypam.com/uploads/2/1/4/4/21443894/hockneyswimmingpoolwithshoes_orig.jpg",
+// [14:13:29]           },
+// [14:13:29]         ],
+// [14:13:29]         "webEntities": Array [
+// [14:13:29]           Object {
+// [14:13:29]             "description": "Irises",
+// [14:13:29]             "entityId": "/m/037t7s",
+// [14:13:29]             "score": 1.3225499,
+// [14:13:29]           },
+// [14:13:29]         ],
+// [14:13:29]       },
+// [14:13:29]     },
+// [14:13:29]   ],
+// [14:13:29] }
