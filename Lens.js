@@ -4,16 +4,21 @@ import googleAPIKey from './cloudVision';
 
 
 import React, { Fragment } from 'react';
-import { Text, View, TouchableOpacity, ScrollView, Button } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView, Button, WebView } from 'react-native';
 import { Camera, Permissions, FileSystem } from 'expo';
 import styles from './Lens.styles';
 
 import Colors from './Colors';
 
+import GoogleArtPalette from './GoogleArtPalette';
+
+
+
 export default class CameraExample extends React.Component {
   constructor() {
     super();
     this.state = {
+      webView: false,
       colors: [],
       description: '',
       hasCameraPermission: null,
@@ -41,6 +46,7 @@ export default class CameraExample extends React.Component {
     this.takePicture = this.takePicture.bind(this);
     this.requestAnalysis = this.requestAnalysis.bind(this);
     this.returnToCamera = this.returnToCamera.bind(this);
+    this.toggleWebView = this.toggleWebView.bind(this);
   }
 
 
@@ -50,6 +56,10 @@ export default class CameraExample extends React.Component {
     return `rgb(${red}, ${green}, ${blue})`
     // console.log(`getRGB: rgb(${red}, ${green}, ${blue})`)
 
+  }
+
+  toggleWebView() {
+    this.setState({ webView: !this.state.webView })
   }
 
   async requestAnalysis(base64) {
@@ -131,8 +141,10 @@ export default class CameraExample extends React.Component {
   }
 
   render() {
-    const { colors } = this.state;
-    const { takePicture, logPress, getRGB, returnToCamera } = this;
+    const { colors, webView } = this.state;
+    const { takePicture, logPress, getRGB, returnToCamera, toggleWebView } = this;
+
+
 
     const { hasCameraPermission } = this.state;
     if (hasCameraPermission === null) {
@@ -142,13 +154,27 @@ export default class CameraExample extends React.Component {
     } else {
 
 
-      if (this.state.description) {
+      // if (this.state.description) {
+      //   return (
+      //     <View>
+      //       <Text>
+      //         {this.state.description}
+      //       </Text>
+      //     </View>
+      //   )
+      // } 
+
+      if (webView) {
         return (
-          <View>
-            <Text>
-              {this.state.description}
-            </Text>
-          </View>
+          <Fragment>
+            <GoogleArtPalette colors={colors}/>
+            <View style={{ padding: 30, backgroundColor: 'black' }}>  
+              <Button
+                title='Return To Camera'
+                onPress={toggleWebView}
+              />
+            </View>
+          </Fragment>
         )
       } 
 
@@ -169,12 +195,18 @@ export default class CameraExample extends React.Component {
                 })
               }
             </ScrollView>
-            <View style={{ padding: 30 }}>  
-              <Button
-                title='RETURN TO CAMERA'
-                // style={{ position: 'fixed'}}
-                onPress={returnToCamera}
-              />
+              <View style={{ padding: 30, display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', backgroundColor: 'black'}}>  
+                  <Button
+                    title='Return to Camera'
+                    onPress={returnToCamera}
+                    style={{ flex: 1}}
+                  />
+                  <Button
+                    title='Google Art'
+                    onPress={toggleWebView}
+                    style={{ flex: 1}}
+
+                  />
             </View>
           </Fragment>
         )
@@ -208,12 +240,13 @@ export default class CameraExample extends React.Component {
 
 
               </Camera>
-               <View style={{ padding: 30 }}>  
-                    <Button
-                      title='CREATE PALETTE'
-                      onPress={takePicture}
-                    />
-                  </View>
+
+                <View style={{ padding: 30, backgroundColor: 'black' }}>  
+                  <Button
+                    title='CREATE PALETTE'
+                    onPress={takePicture}
+                  />
+                </View>
             </View>
           </Fragment>
         );
