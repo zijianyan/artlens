@@ -108,7 +108,7 @@ export default class CameraExample extends React.Component {
   async requestAnalysis(base64) {
    try { 
     
-
+    this.setState({ loading: true })
     const body = {
         requests:[
           {
@@ -137,8 +137,8 @@ export default class CameraExample extends React.Component {
 
     const cloudVisionData = await response.json();
     const cloudVisionColors = cloudVisionData.responses[0].imagePropertiesAnnotation.dominantColors.colors;
-    this.setState({ colors: cloudVisionColors });
-
+    this.setState({ colors: cloudVisionColors, loading: false });
+      
    }
    catch(ex) {
      console.log(ex);
@@ -181,6 +181,15 @@ export default class CameraExample extends React.Component {
   }
 
   render() {
+
+    if(this.state.loading) {
+      return (
+        <View>
+          <Text>Loading...</Text>
+        </View>
+      )
+    }
+
     const { colors, webView } = this.state;
     const { takePicture, logPress, getRGB, returnToCamera, toggleWebView } = this;
 
