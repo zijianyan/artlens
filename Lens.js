@@ -59,6 +59,9 @@ export default class CameraExample extends React.Component {
   }
 
   toggleWebView() {
+    if (this.state.webView) {
+      this.setState({ colors: [] })
+    }
     this.setState({ webView: !this.state.webView })
   }
 
@@ -102,7 +105,7 @@ export default class CameraExample extends React.Component {
 
     // console.log('cloudVisonColors:', cloudVisionColors);
     this.setState({ colors: cloudVisionColors });
-    console.log('this.state.colors:', this.state.colors);
+    // console.log('this.state.colors:', this.state.colors);
 
 
   }
@@ -188,7 +191,7 @@ export default class CameraExample extends React.Component {
               {
                 colors.map( (color, index) => {
                   const rgb = getRGB(color);
-                  console.log('rgb:', rgb);
+                  // console.log('rgb:', rgb);
                   return (
                     <View key={index} style={{ width: 200, backgroundColor: getRGB(color) }} />
                   )

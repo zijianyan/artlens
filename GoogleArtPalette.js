@@ -12,13 +12,21 @@ export default class GoogleArtPalette extends React.Component {
 
   createUrl(_colors) {
     const colors = _colors.slice(0, 5);
-    const hex = colors.map( color => {
-      const { rgb } = color;
-      const { red, green, blue } = rgb;
+    
+    const hex = colors.map( colorObj => {
+      const { color } = colorObj;
+      console.log('color:', color);
+      const { red, green, blue } = color;
       return rgbHex(red, green, blue);
     })
 
-    const urlStart = ''
+    const urlStart = 'https://artsexperiments.withgoogle.com/artpalette/colors/'
+
+    const colorUrl = hex.join('-');
+
+    return urlStart + colorUrl;
+
+    // https://artsexperiments.withgoogle.com/artpalette/colors/a43977-f0bcc6-aabd2f-569a45-e2e0d3
 
   }
 
@@ -26,14 +34,13 @@ export default class GoogleArtPalette extends React.Component {
     const { colors } = this.props;
 
 
-    // https://artsexperiments.withgoogle.com/artpalette/colors/a43977-f0bcc6-aabd2f-569a45-e2e0d3
-
+    const colorUrl = this.createUrl(colors);
 
 
     return (
       <Fragment>
         <WebView
-          source={{uri: 'https://artsexperiments.withgoogle.com/artpalette/colors/a43977-f0bcc6-aabd2f-569a45-e2e0d3'}}
+          source={{uri: colorUrl}}
           style={{marginTop: 20}}
         />
       </Fragment>
