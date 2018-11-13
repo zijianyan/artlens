@@ -6,7 +6,7 @@ import googleAPIKey from './cloudVision';
 import rgbHex from 'rgb-hex';
 
 import React, { Fragment } from 'react';
-import { Text, View, TouchableOpacity, ScrollView, Button, WebView } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView, Button, WebView, ActivityIndicator } from 'react-native';
 import { Camera, Permissions, FileSystem } from 'expo';
 import styles from './Lens.styles';
 
@@ -20,6 +20,7 @@ export default class CameraExample extends React.Component {
   constructor() {
     super();
     this.state = {
+      loading: false,
       webView: false,
       colors: [],
       description: '',
@@ -77,8 +78,6 @@ export default class CameraExample extends React.Component {
     const { color } = colorObj;
     const { red, green, blue } = color;
     return `rgb(${red}, ${green}, ${blue})`
-    // console.log(`getRGB: rgb(${red}, ${green}, ${blue})`)
-
   }
 
   toggleWebView() {
@@ -90,6 +89,8 @@ export default class CameraExample extends React.Component {
 
   async requestAnalysis(base64) {
    try { 
+    
+
     const body = {
         requests:[
           {
@@ -100,9 +101,6 @@ export default class CameraExample extends React.Component {
               {
                 "type": "IMAGE_PROPERTIES"
               },
-              // { "type": "LABEL_DETECTION", "maxResults": 5 },
-              // { "type": "LOGO_DETECTION", "maxResults": 3 },
-              // { "type": "WEB_DETECTION", "maxResults": 1 }
             ]
           },
         ],
@@ -121,15 +119,7 @@ export default class CameraExample extends React.Component {
 
     const cloudVisionData = await response.json();
     const cloudVisionColors = cloudVisionData.responses[0].imagePropertiesAnnotation.dominantColors.colors;
-    // const cloudLogoDescription = cloudVisionData.responses[0].logoAnnotations[0].description;
-    // const cloudWebLabel = cloudVisionData.responses[0].webDetection.bestGuessLabels[0].label;
-
-    // console.log('logoDescription:', cloudLogoDescription);
-    // console.log('cloudWebLabel:', cloudWebLabel);
-
-    // console.log('cloudVisonColors:', cloudVisionColors);
     this.setState({ colors: cloudVisionColors });
-    // console.log('this.state.colors:', this.state.colors);
 
    }
    catch(ex) {
@@ -152,6 +142,8 @@ export default class CameraExample extends React.Component {
       const { base64 } = picture;
       await this.requestAnalysis(base64);
     }
+    
+
   };
 
   // async onPictureSaved (photo) {
@@ -174,25 +166,20 @@ export default class CameraExample extends React.Component {
     const { colors, webView } = this.state;
     const { takePicture, logPress, getRGB, returnToCamera, toggleWebView } = this;
 
-
-
     const { hasCameraPermission } = this.state;
+
+    if(this.state.loading === true ) {
+      return (
+        <ActivityIndicator />
+      )
+    }
+
     if (hasCameraPermission === null) {
       return <View />;
     } else if (hasCameraPermission === false) {
       return <Text>No access to camera</Text>;
     } else {
 
-
-      // if (this.state.description) {
-      //   return (
-      //     <View>
-      //       <Text>
-      //         {this.state.description}
-      //       </Text>
-      //     </View>
-      //   )
-      // } 
 
       if (webView) {
         return (
@@ -209,8 +196,6 @@ export default class CameraExample extends React.Component {
       } 
 
       if (colors.length) {
-
-        
 
         return ( 
           <Fragment> 
@@ -267,24 +252,14 @@ export default class CameraExample extends React.Component {
               pictureSize={this.state.pictureSize}
               onMountError={this.handleMountError}
               >
-           
-
-
-
-
-                 
-
-
-
-
               </Camera>
 
-                <View style={{ elevation: 9, padding: 30, backgroundColor: '#404040' }}>  
-                  <Button
-                    title='CREATE PALETTE'
-                    onPress={takePicture}
-                  />
-                </View>
+              <View style={{ elevation: 9, padding: 30, backgroundColor: '#404040' }}>  
+                <Button
+                  title='CREATE PALETTE'
+                  onPress={takePicture}
+                />
+              </View>
             </View>
           </Fragment>
         );
@@ -296,164 +271,3 @@ export default class CameraExample extends React.Component {
 }
 
 
-
-
-// Animatable.Text animation="zoomInUp"
-
-                  // <TouchableOpacity
-                  //   style={{
-                  //     flex: 0.3,
-                  //     alignSelf: 'flex-end',
-                  //     alignItems: 'center',
-                  //   }}
-                  //   onPress={takePicture}>
-                  //   <Text
-                  //     style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
-                  //     {' '}Button take picture{' '}
-                  //   </Text>
-                  // </TouchableOpacity>
-
-
-              // <TouchableOpacity
-              //   style={{
-              //     flex: 0.1,
-              //     alignSelf: 'flex-end',
-              //     alignItems: 'center',
-              //   }}
-              //   onPress={() => {
-              //     this.setState({
-              //       type: this.state.type === Camera.Constants.Type.back
-              //         ? Camera.Constants.Type.front
-              //         : Camera.Constants.Type.back,
-              //     });
-              //   }}>
-              //   <Text
-              //     style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
-              //     {' '}Flip{' '}
-              //   </Text>
-              // </TouchableOpacity>
-
-              
-
-            //               ref={ref => {
-            //   this.camera = ref;
-            // }}
-
-
-
-
-              //             <TouchableOpacity
-              //   style={{
-              //     flex: 0.1,
-              //     alignSelf: 'flex-end',
-              //     alignItems: 'center',
-              //   }}
-              //   onPress={takePicture}>
-              //   <Text
-              //     style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
-              //     {' '}Take Picture{' '}
-              //   </Text>
-              // </TouchableOpacity>
-
-
-
-/****met info */
-
-// axios.get('https://metmuseum.org/api/collection/collectionlisting?q=john%20singer%20sargent&perPage=20&searchField=All&sortBy=relevance&offset=0&pageSize=0')
-//   .then( res => res.data )
-//   .then( data => data.results )
-//   .then( results => {
-//     const painting = results[0];
-//   })
-
-// const sampleResult =
-// {
-//   title: 'Madame X (Madame Pierre Gautreau)',
-//   description: 'John Singer Sargent (American, Florence 1856–1925 London)',
-//   artist: '  ',
-//   culture: 'American',
-//   teaserText: '<p>John Singer Sargent (American, Florence 1856–1925 London) </p><p>Date: 1883–84<br/>Accession Number: 16.53</p>',
-//   url: '/art/collection/search/12127?searchField=All&amp;sortBy=relevance&amp;ft=john+singer+sargent&amp;offset=0&amp;rpp=20&amp;pos=1',
-//   image: 'https://images.metmuseum.org/CRDImages/ad/mobile-large/DT91.jpg',
-//   regularImage: 'ad/web-additional/DT91.jpg',
-//   largeImage: 'ad/web-large/DT91.jpg',
-//   date: '1883–84',
-//   medium: 'Oil on canvas',
-//   accessionNumber: '16.53',
-//   galleryInformation: 'On view at The Met Fifth Avenue in <a href=\'http://maps.metmuseum.org/galleries/fifth-ave/2/771\' target=\'_blank\'>Gallery 771</a>'
-// }
-
-
-
-
-
-/**** example cloudVision response below */
-
-
-// cloudVisionData: Object {
-// [14:13:29]   "responses": Array [
-// [14:13:29]     Object {
-// [14:13:29]       "logoAnnotations": Array [
-// [14:13:29]         Object {
-// [14:13:29]           "boundingPoly": Object {
-// [14:13:29]             "vertices": Array [
-// [14:13:29]               Object {
-// [14:13:29]                 "x": 73,
-// [14:13:29]                 "y": 71,
-// [14:13:29]               },
-// [14:13:29]               Object {
-// [14:13:29]                 "x": 158,
-// [14:13:29]                 "y": 71,
-// [14:13:29]               },
-// [14:13:29]               Object {
-// [14:13:29]                 "x": 158,
-// [14:13:29]                 "y": 116,
-// [14:13:29]               },
-// [14:13:29]               Object {
-// [14:13:29]                 "x": 73,
-// [14:13:29]                 "y": 116,
-// [14:13:29]               },
-// [14:13:29]             ],
-// [14:13:29]           },
-// [14:13:29]           "description": "Vase with Irises",
-// [14:13:29]           "score": 0.37161863,
-// [14:13:29]         },
-// [14:13:29]       ],
-// [14:13:29]       "webDetection": Object {
-// [14:13:29]         "bestGuessLabels": Array [
-// [14:13:29]           Object {
-// [14:13:29]             "label": "metropolitan museum of art",
-// [14:13:29]           },
-// [14:13:29]         ],
-// [14:13:29]         "pagesWithMatchingImages": Array [
-// [14:13:29]           Object {
-// [14:13:29]             "pageTitle": "Beautiful Vincent van Gogh Metal Prints artwork for sale ... - <b>Art</b>.com",
-// [14:13:29]             "partialMatchingImages": Array [
-// [14:13:29]               Object {
-// [14:13:29]                 "url": "https://imgc.artprintimages.com/img/print/vincent-van-gogh-irises_u-l-pnxjyf0.jpg?src=gp&w=300&h=300",
-// [14:13:29]               },
-// [14:13:29]             ],
-// [14:13:29]             "url": "https://www.art.com/gallery/id--a84-d779949/vincent-van-gogh-metal-prints.htm",
-// [14:13:29]           },
-// [14:13:29]         ],
-// [14:13:29]         "partialMatchingImages": Array [
-// [14:13:29]           Object {
-// [14:13:29]             "url": "https://item-shopping.c.yimg.jp/i/j/primavera-cards_ns45rcf0bk",
-// [14:13:29]           },
-// [14:13:29]         ],
-// [14:13:29]         "visuallySimilarImages": Array [
-// [14:13:29]           Object {
-// [14:13:29]             "url": "http://www.celebrityartbypam.com/uploads/2/1/4/4/21443894/hockneyswimmingpoolwithshoes_orig.jpg",
-// [14:13:29]           },
-// [14:13:29]         ],
-// [14:13:29]         "webEntities": Array [
-// [14:13:29]           Object {
-// [14:13:29]             "description": "Irises",
-// [14:13:29]             "entityId": "/m/037t7s",
-// [14:13:29]             "score": 1.3225499,
-// [14:13:29]           },
-// [14:13:29]         ],
-// [14:13:29]       },
-// [14:13:29]     },
-// [14:13:29]   ],
-// [14:13:29] }
