@@ -275,14 +275,16 @@ export default class CameraExample extends React.Component {
               >
               </Camera>
 
-              <View style={{ elevation: 9, padding: 30, backgroundColor: '#404040' }}>  
+              <View style={{ elevation: 9, padding: 30, display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', backgroundColor: '#404040' }}>  
                 <Button
                   title='Take Photo'
                   onPress={takePicture}
+                  style={{ flex: 1 }}
                 />
                 <Button
                   title='Pick Image'
                   onPress={this.pickImage}
+                  style={{ flex: 1 }}
                 />
               </View>
             </View>
