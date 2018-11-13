@@ -61,7 +61,7 @@ export default class CameraExample extends React.Component {
       base64: true
     });
 
-    console.log(image);
+    // console.log(image);
 
     const { base64 } = image;
     await this.requestAnalysis(base64);
