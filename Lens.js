@@ -184,8 +184,8 @@ export default class CameraExample extends React.Component {
 
     if(this.state.loading) {
       return (
-        <View>
-          <Text>Loading...</Text>
+        <View style={{ flex: 1,  justifyContent: 'center', alignItems: 'center', backgroundColor: '#181818'}}>
+          <ActivityIndicator size={'large'} style={{}}/>
         </View>
       )
     }
@@ -194,12 +194,6 @@ export default class CameraExample extends React.Component {
     const { takePicture, logPress, getRGB, returnToCamera, toggleWebView } = this;
 
     const { hasCameraPermission } = this.state;
-
-    if(this.state.loading === true ) {
-      return (
-        <ActivityIndicator />
-      )
-    }
 
     if (hasCameraPermission === null) {
       return <View />;
