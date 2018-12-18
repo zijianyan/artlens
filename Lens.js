@@ -1,21 +1,11 @@
 import axios from 'axios';
-
-import googleAPIKey from './cloudVision';
-
-
 import rgbHex from 'rgb-hex';
-
 import React, { Fragment } from 'react';
 import { Text, View, TouchableOpacity, ScrollView, Button, WebView, ActivityIndicator } from 'react-native';
 import { Camera, Permissions, FileSystem, ImagePicker } from 'expo';
 import styles from './Lens.styles';
-
 import Colors from './Colors';
-
 import GoogleArtPalette from './GoogleArtPalette';
-
-
-
 
 export default class CameraExample extends React.Component {
   constructor() {
@@ -28,7 +18,6 @@ export default class CameraExample extends React.Component {
       description: '',
       hasCameraPermission: null,
       type: Camera.Constants.Type.back,
-
       flash: 'off',
       zoom: 0,
       autoFocus: 'on',
@@ -46,7 +35,6 @@ export default class CameraExample extends React.Component {
       pictureSizeId: 0,
       showGallery: false,
       showMoreOptions: false,
-
     }
     this.takePicture = this.takePicture.bind(this);
     this.requestAnalysis = this.requestAnalysis.bind(this);
@@ -60,32 +48,24 @@ export default class CameraExample extends React.Component {
       aspect: [4, 3],
       base64: true
     });
-
-    // console.log(image);
-
     const { base64 } = image;
     await this.requestAnalysis(base64);
-
     if (!image.cancelled) {
       this.setState({ image: image.uri });
     }
   };
 
   idealTextColor(bgColor) {
-
     var nThreshold = 150;
     var components = this.getRGBComponents(bgColor);
     var bgDelta = (components.R * 0.299) + (components.G * 0.587) + (components.B * 0.114);
-
     return ((255 - bgDelta) < nThreshold) ? "#000000" : "#ffffff";   
   }
 
   getRGBComponents(color) {       
-
       var r = color.substring(1, 3);
       var g = color.substring(3, 5);
       var b = color.substring(5, 7);
-
       return {
         R: parseInt(r, 16),
         G: parseInt(g, 16),
@@ -105,10 +85,9 @@ export default class CameraExample extends React.Component {
     }
     this.setState({ webView: !this.state.webView })
   }
-
+  
   async requestAnalysis(base64) {
    try { 
-    
     this.setState({ loading: true })
     const body = {
         requests:[
@@ -124,8 +103,6 @@ export default class CameraExample extends React.Component {
           },
         ],
       };
-
-    console.log('fetching...');
     const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${googleAPIKey}` , {
       method: 'POST',
       headers: {
@@ -134,15 +111,11 @@ export default class CameraExample extends React.Component {
       },
       body: JSON.stringify(body),
     });
-    console.log('fetched!');
-
     const cloudVisionData = await response.json();
     const cloudVisionColors = cloudVisionData.responses[0].imagePropertiesAnnotation.dominantColors.colors;
-    this.setState({ colors: cloudVisionColors, loading: false });
-      
+    this.setState({ colors: cloudVisionColors, loading: false });      
    }
    catch(ex) {
-     console.log(ex);
    }
   }
 
@@ -161,8 +134,6 @@ export default class CameraExample extends React.Component {
       const { base64 } = picture;
       await this.requestAnalysis(base64);
     }
-    
-
   };
 
   // async onPictureSaved (photo) {
@@ -173,16 +144,11 @@ export default class CameraExample extends React.Component {
   //   this.setState({ newPhotos: true });
   // }
 
-  logPress() {
-    console.log('button pressed');
-  }
-
   returnToCamera() {
     this.setState({ colors: [] })
   }
 
   render() {
-
     if(this.state.loading) {
       return (
         <View style={{ flex: 1,  justifyContent: 'center', alignItems: 'center', backgroundColor: '#181818'}}>
@@ -191,19 +157,14 @@ export default class CameraExample extends React.Component {
         </View>
       )
     }
-
     const { colors, webView } = this.state;
-    const { takePicture, logPress, getRGB, returnToCamera, toggleWebView } = this;
-
+    const { takePicture, getRGB, returnToCamera, toggleWebView } = this;
     const { hasCameraPermission } = this.state;
-
     if (hasCameraPermission === null) {
       return <View />;
     } else if (hasCameraPermission === false) {
       return <Text>No access to camera</Text>;
     } else {
-
-
       if (webView) {
         return (
           <Fragment>
@@ -217,20 +178,15 @@ export default class CameraExample extends React.Component {
           </Fragment>
         )
       } 
-
       if (colors.length) {
-
         return ( 
           <Fragment> 
-            
             <ScrollView style={{ backgroundColor: '#404040', paddingTop: 40 }}>
-              
               {
                 colors.map( (color, index) => {
                   const rgb = getRGB(color);
                   const hex = rgbHex(rgb);
                   const textColor = this.idealTextColor(hex);
-
                   return (
                     <View key={index} style={{ elevation: 8, borderRadius: 15, marginTop: 15, marginRight: 30, marginBottom: 15, marginLeft: 30, height: 200, backgroundColor: getRGB(color), padding: 15 }}>
                       <Text style={{ color: textColor }}>{rgb}</Text>
@@ -250,7 +206,6 @@ export default class CameraExample extends React.Component {
                     title='Google Art'
                     onPress={toggleWebView}
                     style={{ flex: 1}}
-
                   />
             </View>
           </Fragment>
@@ -275,7 +230,6 @@ export default class CameraExample extends React.Component {
               onMountError={this.handleMountError}
               >
               </Camera>
-
               <View style={{ elevation: 9, padding: 30, display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', backgroundColor: '#404040' }}>  
                 <Button
                   title='Take Photo'
@@ -292,8 +246,6 @@ export default class CameraExample extends React.Component {
           </Fragment>
         );
       }
-
-      
     }
   }
 }
