@@ -1,20 +1,14 @@
 
 import React, { Fragment } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-
+import { Text, View, TouchableOpacity } from 'react-native';
 import rgbHex from 'rgb-hex';
 
 export default class Color extends React.Component {
-  state = {
-
-  };
 
   getRGB(colorObj) {
     const { color } = colorObj;
     const { red, green, blue } = color;
     return `rgb(${red}, ${green}, ${blue})`
-    // console.log(`getRGB: rgb(${red}, ${green}, ${blue})`)
-
   }
 
   render() {
@@ -36,19 +30,7 @@ export default class Color extends React.Component {
         </View>
       </Fragment>
     )
-    
   }
+  
 }
-
-
-
-
-const styles = StyleSheet.create({
-  container: {
-    // flex: 1,
-    // // backgroundColor: '#fff',
-    // alignItems: 'center',
-    // justifyContent: 'center',
-  },
-});
 
